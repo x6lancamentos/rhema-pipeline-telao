@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo-rhema.png">
   <title>Rhema Imóveis • Cockpit de Pipelines & Telão Comercial</title>
   
   <!-- Google Fonts -->
@@ -24,6 +25,14 @@
       --bg-card-hover: #1A2846;
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-gold: rgba(212, 163, 89, 0.25);
+      --border-rhema: rgba(225, 48, 56, 0.35);
+
+      /* Identidade Visual Oficial Rhema Imóveis */
+      --rhema-red: #E13038;
+      --rhema-red-dark: #C52229;
+      --rhema-red-glow: rgba(225, 48, 56, 0.35);
+      --rhema-navy: #061C38;
+      --rhema-navy-light: #0B2545;
       
       --gold-primary: #D4A359;
       --gold-light: #F3C98B;
@@ -102,7 +111,7 @@
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--gold-primary);
+      background: var(--rhema-red);
     }
 
     /* App Container */
@@ -124,7 +133,7 @@
       align-items: center;
       justify-content: space-between;
       background: var(--bg-surface);
-      border: 1px solid var(--border-gold);
+      border: 1px solid rgba(225, 48, 56, 0.28);
       border-radius: var(--radius-xl);
       padding: 14px 24px;
       box-shadow: var(--shadow-card), var(--shadow-glow);
@@ -142,61 +151,87 @@
       gap: 16px;
     }
 
-    /* Logo Rhema Vetorial SVG */
+    /* Logo Rhema Oficial e Identidade Visual */
     .rhema-logo-box {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       text-decoration: none;
       color: inherit;
     }
 
-    .logo-emblem {
-      width: 44px;
-      height: 44px;
-      position: relative;
+    .rhema-logo-wrapper {
+      background: #FFFFFF;
+      padding: 5px 14px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #1B2947 0%, #0E1626 100%);
-      border: 1.5px solid var(--gold-primary);
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(212, 163, 89, 0.25);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 0 1.5px rgba(225, 48, 56, 0.3);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .logo-emblem svg {
-      width: 28px;
-      height: 28px;
+    .rhema-logo-wrapper:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(225, 48, 56, 0.4), 0 0 0 1.5px var(--rhema-red);
     }
 
-    .brand-text {
+    .rhema-logo-img {
+      height: 38px;
+      max-height: 38px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .brand-meta {
       display: flex;
       flex-direction: column;
+      gap: 3px;
     }
 
-    .brand-text h1 {
-      font-family: var(--font-display);
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      color: #FFFFFF;
-      line-height: 1.1;
+    .brand-title-badge {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .brand-text h1 span {
-      color: var(--gold-primary);
+    .brand-system-name {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #FFFFFF;
+      line-height: 1.1;
     }
 
-    .brand-text p {
-      font-size: 11px;
-      color: var(--gold-light);
-      letter-spacing: 0.14em;
+    .brand-badge-pill {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--rhema-red);
+      background: rgba(225, 48, 56, 0.15);
+      border: 1px solid rgba(225, 48, 56, 0.35);
+      padding: 2px 7px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       font-weight: 600;
       font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-sub span {
+      color: var(--gold-primary);
     }
 
     .live-badge {
@@ -1385,19 +1420,18 @@
          TOP HEADER COM LOGO RHEMA & CONTROLE DE AUTO-REFRESH 30 MIN
          ========================================================================== -->
     <header class="dashboard-header">
-      <!-- Marca & Logo Rhema -->
+      <!-- Marca & Logo Rhema Oficial -->
       <div class="brand-group">
-        <a href="#" class="rhema-logo-box">
-          <div class="logo-emblem">
-            <!-- Emblema Geométrico Dourado da Rhema -->
-            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M50 8L88 30V70L50 92L12 70V30L50 8Z" stroke="#D4A359" stroke-width="5" fill="rgba(212,163,89,0.12)"/>
-              <path d="M36 28H56C63.732 28 70 34.268 70 42C70 49.732 63.732 56 56 56H48M48 56L68 74M48 56H36V74" stroke="#F3C98B" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <a href="/" class="rhema-logo-box" title="Rhema Imóveis • Cockpit de Pipelines">
+          <div class="rhema-logo-wrapper">
+            <img src="/logo-rhema.png" alt="Rhema Imóveis" class="rhema-logo-img" />
           </div>
-          <div class="brand-text">
-            <h1>RHEMA <span>IMÓVEIS</span></h1>
-            <p>Cockpit Comercial • Santos/SP</p>
+          <div class="brand-meta">
+            <div class="brand-title-badge">
+              <span class="brand-system-name">Cockpit de Pipelines</span>
+              <span class="brand-badge-pill">Vendas & ADM</span>
+            </div>
+            <p class="brand-sub">Cockpit Comercial • <span>Santos/SP</span> • Telão 24h</p>
           </div>
         </a>
         <div class="live-badge">
