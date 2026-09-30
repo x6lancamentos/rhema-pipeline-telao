@@ -1,0 +1,2774 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhema Imóveis • Cockpit de Pipelines & Telão Comercial</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- ApexCharts CDN para gráficos animados -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  
+  <!-- Canvas Confetti para celebração de fechamentos -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070B14;
+      --bg-surface: #0E1626;
+      --bg-card: #141F36;
+      --bg-card-hover: #1A2846;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-gold: rgba(212, 163, 89, 0.25);
+      
+      --gold-primary: #D4A359;
+      --gold-light: #F3C98B;
+      --gold-dark: #9D7436;
+      
+      --blue-accent: #0284C7;
+      --blue-glow: #38BDF8;
+      
+      --pipe-prevendas: #8B5CF6;
+      --pipe-prevendas-bg: rgba(139, 92, 246, 0.12);
+      
+      --pipe-vendas: #3B82F6;
+      --pipe-vendas-bg: rgba(59, 130, 246, 0.12);
+      
+      --pipe-closer: #F59E0B;
+      --pipe-closer-bg: rgba(245, 158, 11, 0.12);
+      
+      --pipe-pos: #10B981;
+      --pipe-pos-bg: rgba(16, 185, 129, 0.12);
+      
+      --status-crit: #EF4444;
+      --status-crit-bg: rgba(239, 68, 68, 0.16);
+      --status-warn: #F59E0B;
+      --status-warn-bg: rgba(245, 158, 11, 0.16);
+      --status-ok: #10B981;
+      --status-ok-bg: rgba(16, 185, 129, 0.16);
+      
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      
+      --font-display: 'Outfit', sans-serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      
+      --shadow-card: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+      --shadow-glow: 0 0 25px rgba(212, 163, 89, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(212, 163, 89, 0.07) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #233350;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-primary);
+    }
+
+    /* App Container */
+    .app-wrapper {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 16px 24px 32px;
+      max-width: 1920px;
+      margin: 0 auto;
+      gap: 16px;
+    }
+
+    /* ==========================================================================
+       HEADER EXECUTIVO & CONTROLES DO TELÃO
+       ========================================================================== */
+    header.dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-xl);
+      padding: 14px 24px;
+      box-shadow: var(--shadow-card), var(--shadow-glow);
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Logo Rhema Vetorial SVG */
+    .rhema-logo-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .logo-emblem {
+      width: 44px;
+      height: 44px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1B2947 0%, #0E1626 100%);
+      border: 1.5px solid var(--gold-primary);
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(212, 163, 89, 0.25);
+    }
+
+    .logo-emblem svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #FFFFFF;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-text h1 span {
+      color: var(--gold-primary);
+    }
+
+    .brand-text p {
+      font-size: 11px;
+      color: var(--gold-light);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34D399;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-left: 8px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Seção Central do Header: Timer de 30 min e Relógio */
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .clock-widget {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 6px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .clock-time {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 0.05em;
+    }
+
+    .clock-date {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Auto-Refresh Timer Box (1 minuto) */
+    .refresh-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, rgba(212, 163, 89, 0.08), rgba(2, 132, 199, 0.08));
+      border: 1px solid rgba(212, 163, 89, 0.3);
+      padding: 6px 16px;
+      border-radius: var(--radius-md);
+    }
+
+    .timer-ring-container {
+      position: relative;
+      width: 32px;
+      height: 32px;
+    }
+
+    .timer-ring-svg {
+      transform: rotate(-90deg);
+      width: 32px;
+      height: 32px;
+    }
+
+    .timer-circle-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 3.5;
+    }
+
+    .timer-circle-progress {
+      fill: none;
+      stroke: var(--gold-primary);
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .timer-text-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timer-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .timer-countdown {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .btn-refresh {
+      background: rgba(212, 163, 89, 0.15);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-refresh:hover {
+      background: var(--gold-primary);
+      color: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(212, 163, 89, 0.35);
+    }
+
+    .btn-refresh.spinning svg {
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Controles do Telão: Presets e Toggles */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .view-preset-group {
+      display: flex;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-preset {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-preset:hover {
+      color: #FFF;
+    }
+
+    .btn-preset.active {
+      background: var(--gold-primary);
+      color: #090E17;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(212, 163, 89, 0.3);
+    }
+
+    .btn-icon {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+      background: var(--bg-card-hover);
+    }
+
+    /* ==========================================================================
+       BARRA DE CONTROLES: PIPELINES VISÍVEIS + FILTRO DE CORRETOR & PERÍODO
+       ========================================================================== */
+    .pipeline-toggle-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      background: rgba(14, 22, 38, 0.75);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 12px 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .toggle-left-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-group-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pipeline-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pipe-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 13px;
+      border-radius: 999px;
+      border: 1px solid;
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .pipe-pill.pill-prevendas {
+      border-color: rgba(139, 92, 246, 0.4);
+      color: #C4B5FD;
+    }
+    .pipe-pill.pill-prevendas.active {
+      background: var(--pipe-prevendas);
+      color: #FFFFFF;
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.4);
+    }
+
+    .pipe-pill.pill-vendas {
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #93C5FD;
+    }
+    .pipe-pill.pill-vendas.active {
+      background: var(--pipe-vendas);
+      color: #FFFFFF;
+      box-shadow: 0 0 14px rgba(59, 130, 246, 0.4);
+    }
+
+    .pipe-pill.pill-closer {
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #FDE68A;
+    }
+    .pipe-pill.pill-closer.active {
+      background: var(--pipe-closer);
+      color: #000;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+
+    .pipe-pill.pill-pos {
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #A7F3D0;
+    }
+    .pipe-pill.pill-pos.active {
+      background: var(--pipe-pos);
+      color: #042F2E;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .pill-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Seletores de Filtro (Corretor e Período) */
+    .filters-right-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(7, 11, 20, 0.65);
+      border: 1px solid rgba(212, 163, 89, 0.3);
+      padding: 5px 12px;
+      border-radius: var(--radius-md);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .filter-control-group:focus-within,
+    .filter-control-group:hover {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 12px rgba(212, 163, 89, 0.18);
+    }
+
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .filter-select {
+      background: transparent;
+      border: none;
+      color: #FFFFFF;
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      padding-right: 6px;
+    }
+
+    .filter-select option {
+      background: #0E1626;
+      color: #FFFFFF;
+      padding: 8px;
+    }
+
+    .btn-clear-filters {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+      font-family: var(--font-sans);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-clear-filters.visible {
+      display: inline-flex;
+    }
+
+    .btn-clear-filters:hover {
+      background: var(--status-crit);
+      color: #FFF;
+    }
+
+    .active-filter-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, rgba(212, 163, 89, 0.16) 0%, rgba(2, 132, 199, 0.12) 100%);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: 8px 18px;
+      font-size: 12.5px;
+      color: var(--gold-light);
+    }
+
+    .active-filter-banner.show {
+      display: flex;
+    }
+
+    /* ==========================================================================
+       RADAR DE ALERTAS CRÍTICOS & SLA
+       ========================================================================== */
+    .alerts-hero-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .alert-stat-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .alert-stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .alert-stat-card.crit {
+      border-left: 4px solid var(--status-crit);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, var(--bg-surface) 100%);
+    }
+
+    .alert-stat-card.warn {
+      border-left: 4px solid var(--status-warn);
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, var(--bg-surface) 100%);
+    }
+
+    .alert-stat-card.ok {
+      border-left: 4px solid var(--status-ok);
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-surface) 100%);
+    }
+
+    .alert-stat-card.vgv {
+      border-left: 4px solid var(--gold-primary);
+      background: linear-gradient(90deg, rgba(212, 163, 89, 0.1) 0%, var(--bg-surface) 100%);
+    }
+
+    .stat-content h4 {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .stat-content .stat-value {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 800;
+      color: #FFF;
+      line-height: 1;
+    }
+
+    .stat-content .stat-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .stat-icon-wrap.crit { background: var(--status-crit-bg); color: var(--status-crit); }
+    .stat-icon-wrap.warn { background: var(--status-warn-bg); color: var(--status-warn); }
+    .stat-icon-wrap.ok { background: var(--status-ok-bg); color: var(--status-ok); }
+    .stat-icon-wrap.vgv { background: rgba(212, 163, 89, 0.2); color: var(--gold-primary); }
+
+    /* ==========================================================================
+       CONTAINER PRINCIPAL DOS PIPELINES (MULTI-PIPELINE VIEW)
+       ========================================================================== */
+    .pipelines-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .pipeline-section {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pipeline-section.hidden {
+      display: none;
+    }
+
+    .pipeline-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pipeline-title-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pipeline-tag {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .pipeline-title-box h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pipeline-meta {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .meta-stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .meta-stat strong {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    /* Colunas do Kanban / Esteira */
+    .pipeline-columns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .kanban-column {
+      background: rgba(14, 22, 38, 0.45);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 220px;
+      transition: border-color 0.2s;
+    }
+
+    .kanban-column:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .column-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .col-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .col-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .col-badge-count {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* SLA Indicator da Etapa */
+    .sla-indicator-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .sla-label {
+      color: var(--text-dim);
+    }
+
+    .sla-badge {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .sla-badge.ok { background: var(--status-ok-bg); color: #34D399; }
+    .sla-badge.warn { background: var(--status-warn-bg); color: #FBBF24; }
+    .sla-badge.crit { background: var(--status-crit-bg); color: #F87171; animation: blink 2s infinite; }
+
+    @keyframes blink {
+      50% { opacity: 0.6; }
+    }
+
+    /* Cards de Oportunidades */
+    .column-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .empty-col-state {
+      text-align: center;
+      padding: 24px 10px;
+      color: var(--text-dim);
+      font-size: 11.5px;
+      font-style: italic;
+      border: 1px dashed rgba(255, 255, 255, 0.07);
+      border-radius: var(--radius-md);
+    }
+
+    .lead-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .lead-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .lead-card.card-crit {
+      border-left: 3.5px solid var(--status-crit);
+    }
+
+    .lead-card.card-warn {
+      border-left: 3.5px solid var(--status-warn);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .lead-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: #FFFFFF;
+      line-height: 1.2;
+    }
+
+    .lead-origin-tag {
+      font-size: 9.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .lead-property-info {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .lead-val {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 6px;
+      color: var(--text-dim);
+    }
+
+    .broker-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .broker-avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9.5px;
+      font-weight: 700;
+    }
+
+    .time-in-stage {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .time-in-stage.alert {
+      color: #F87171;
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       SEÇÃO: RANKING DE CORRETORES & GRÁFICOS ANIMADOS (SPLIT ROW)
+       ========================================================================== */
+    .analytics-row {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 1200px) {
+      .analytics-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-box {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .panel-box-header h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Ranking Gamificado */
+    .ranking-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .ranking-item:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-gold);
+      transform: translateX(3px);
+    }
+
+    .ranking-item.active-broker {
+      border: 2px solid var(--gold-primary) !important;
+      box-shadow: 0 0 18px rgba(212, 163, 89, 0.35);
+      background: linear-gradient(90deg, rgba(212, 163, 89, 0.22) 0%, var(--bg-card-hover) 100%) !important;
+    }
+
+    .ranking-item.top-1 {
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, var(--bg-card) 100%);
+    }
+
+    .ranking-item.top-2 {
+      border: 1.5px solid rgba(148, 163, 184, 0.35);
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 0%, var(--bg-card) 100%);
+    }
+
+    .ranking-item.top-3 {
+      border: 1.5px solid rgba(180, 83, 9, 0.35);
+      background: linear-gradient(90deg, rgba(180, 83, 9, 0.1) 0%, var(--bg-card) 100%);
+    }
+
+    .rank-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rank-pos {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 800;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .top-1 .rank-pos { background: #F59E0B; color: #000; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    .top-2 .rank-pos { background: #94A3B8; color: #000; }
+    .top-3 .rank-pos { background: #B45309; color: #FFF; }
+
+    .broker-info h4 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .broker-info .broker-stats {
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .rank-metrics {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .rank-vgv {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .rank-score {
+      font-size: 11px;
+      color: #34D399;
+      font-weight: 600;
+    }
+
+    /* Gráficos Abas */
+    .chart-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-chart-tab {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 11.5px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-chart-tab.active {
+      background: var(--blue-accent);
+      color: #FFF;
+      border-color: var(--blue-glow);
+    }
+
+    .chart-container-box {
+      min-height: 310px;
+    }
+
+    /* ==========================================================================
+       TICKER DIGITAL INFORMATIVO (RODAPÉ DO TELÃO)
+       ========================================================================== */
+    .news-ticker-bar {
+      background: #090E17;
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .ticker-title {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--gold-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .ticker-content {
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .ticker-track {
+      display: inline-block;
+      white-space: nowrap;
+      animation: ticker 38s linear infinite;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 36px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .ticker-item strong {
+      color: #FFF;
+    }
+
+    .ticker-item .tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--gold-light);
+    }
+
+    @keyframes ticker {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
+    }
+
+    /* ==========================================================================
+       MODAL DE DETALHES DO ATENDIMENTO / LEAD
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--gold-primary);
+      border-radius: var(--radius-xl);
+      max-width: 650px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), var(--shadow-glow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFade 0.25s ease-out;
+    }
+
+    @keyframes modalFade {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #16233D 0%, #0E1626 100%);
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFF;
+    }
+
+    .btn-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px;
+    }
+    .btn-modal-close:hover { color: #FFF; }
+
+    .modal-body {
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .detail-item {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .detail-item label {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .detail-item p {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-action-wa {
+      background: #10B981;
+      color: #000;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn-action-wa:hover {
+      background: #059669;
+      color: #FFF;
+    }
+
+    .btn-celebrate {
+      background: linear-gradient(135deg, #F59E0B, #D97706);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    
+    <!-- ==========================================================================
+         TOP HEADER COM LOGO RHEMA & CONTROLE DE AUTO-REFRESH 30 MIN
+         ========================================================================== -->
+    <header class="dashboard-header">
+      <!-- Marca & Logo Rhema -->
+      <div class="brand-group">
+        <a href="#" class="rhema-logo-box">
+          <div class="logo-emblem">
+            <!-- Emblema Geométrico Dourado da Rhema -->
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M50 8L88 30V70L50 92L12 70V30L50 8Z" stroke="#D4A359" stroke-width="5" fill="rgba(212,163,89,0.12)"/>
+              <path d="M36 28H56C63.732 28 70 34.268 70 42C70 49.732 63.732 56 56 56H48M48 56L68 74M48 56H36V74" stroke="#F3C98B" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>RHEMA <span>IMÓVEIS</span></h1>
+            <p>Cockpit Comercial • Santos/SP</p>
+          </div>
+        </a>
+        <div class="live-badge">
+          <div class="live-dot"></div>
+          TELÃO SALA DE VENDAS
+        </div>
+      </div>
+
+      <!-- Relógio e Auto-Refresh de 30 Minutos -->
+      <div class="header-center">
+        <!-- Relógio Santos/SP -->
+        <div class="clock-widget">
+          <span class="clock-time" id="clock-display">--:--:--</span>
+          <span class="clock-date" id="date-display">Terça, 29 de Setembro</span>
+        </div>
+
+        <!-- Timer Circular Regressivo de 30 Minutos -->
+        <div class="refresh-box" title="Atualiza automaticamente a cada 30 minutos">
+          <div class="timer-ring-container">
+            <svg class="timer-ring-svg" viewBox="0 0 36 36">
+              <path class="timer-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="timer-circle-progress" id="timer-progress-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+          </div>
+          <div class="timer-text-group">
+            <span class="timer-label">Auto-Refresh (30m)</span>
+            <span class="timer-countdown" id="timer-text">01:00</span>
+          </div>
+          <button class="btn-refresh" id="btn-manual-refresh" title="Forçar atualização imediata">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+            Atualizar
+          </button>
+        </div>
+      </div>
+
+      <!-- Presets de Apresentação (Sala de Vendas vs Diretoria) & Fullscreen -->
+      <div class="header-actions">
+        <div class="view-preset-group">
+          <button class="btn-preset active" id="preset-telao" title="Modo Telão: Foco Comercial (Pré-vendas, Vendas e Negociação)">
+            📺 Telão Sala
+          </button>
+          <button class="btn-preset" id="preset-diretoria" title="Modo Diretoria: Exibe TODOS os 4 Pipelines incluindo ADM/FIN">
+            👔 Diretoria
+          </button>
+          <button class="btn-preset" id="preset-carrossel" title="Alternância dinâmica automática">
+            🔄 Auto-Loop
+          </button>
+        </div>
+
+        <button class="btn-icon" id="btn-fullscreen" title="Expandir em Tela Cheia">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ==========================================================================
+         BARRA DE CONTROLES: PIPELINES VISÍVEIS + FILTRO POR CORRETOR E PERÍODO
+         ========================================================================== -->
+    <div class="pipeline-toggle-bar">
+      <!-- Lado Esquerdo: Toggles de Pipeline -->
+      <div class="toggle-left-section">
+        <div class="toggle-group-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Pipelines:
+        </div>
+        <div class="pipeline-pills">
+          <div class="pipe-pill pill-prevendas active" data-pipeline="prevendas">
+            <span class="pill-indicator"></span>
+            1. Pré-Vendas
+          </div>
+          <div class="pipe-pill pill-vendas active" data-pipeline="vendas">
+            <span class="pill-indicator"></span>
+            2. Vendas
+          </div>
+          <div class="pipe-pill pill-closer active" data-pipeline="closer">
+            <span class="pill-indicator"></span>
+            3. Negociação (Closer)
+          </div>
+          <div class="pipe-pill pill-pos" data-pipeline="posvenda" id="toggle-pill-pos">
+            <span class="pill-indicator"></span>
+            4. Pós-Negociação (ADM / FIN)
+          </div>
+        </div>
+      </div>
+
+      <!-- Lado Direito: Filtro por Corretor e Período -->
+      <div class="filters-right-section">
+        <!-- Seletor de Corretor -->
+        <div class="filter-control-group">
+          <span class="filter-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Corretor:
+          </span>
+          <select id="filter-corretor" class="filter-select">
+            <option value="all">Todos os Corretores (Equipe)</option>
+            <option value="Tatiana">Tatiana Gonçalves de Oliveira</option>
+            <option value="Flávia">Flávia Mara de Mattos</option>
+            <option value="Roseli">Roseli de Carvalho Lopes</option>
+            <option value="Leniára">Leniára R. M. Araújo</option>
+            <option value="Luana">Luana Cardoso</option>
+            <option value="Elaine">Elaine do Nascimento</option>
+          </select>
+        </div>
+
+        <!-- Seletor de Período -->
+        <div class="filter-control-group">
+          <span class="filter-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Período:
+          </span>
+          <select id="filter-periodo" class="filter-select">
+            <option value="all">Todo o Período</option>
+            <option value="hoje">Hoje (Últimas 24h)</option>
+            <option value="7d">Últimos 7 dias (Semana)</option>
+            <option value="15d">Últimos 15 dias (Quinzena)</option>
+            <option value="30d">Últimos 30 dias (Mês)</option>
+            <option value="90d">Últimos 90 dias (Trimestre)</option>
+          </select>
+        </div>
+
+        <!-- Botão Limpar Filtros -->
+        <button class="btn-clear-filters" id="btn-clear-filters" title="Resetar filtros de corretor e período">
+          ✕ Limpar Filtros
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner informativo quando filtro está ativo -->
+    <div class="active-filter-banner" id="active-filter-banner">
+      <span id="active-filter-text">🔍 Filtro ativo: Todos os Corretores • Todo o Período</span>
+      <span style="font-size: 11px; color: var(--text-muted);">Dica: Você também pode clicar em um corretor no Ranking abaixo para filtrar</span>
+    </div>
+
+    <!-- ==========================================================================
+         RADAR DE ALERTAS CRÍTICOS & MÉTRICAS VITAIS DE ATENDIMENTO (SLA)
+         ========================================================================== -->
+    <div class="alerts-hero-strip">
+      <!-- Card Alerta: Primeiro Contato Atrasado -->
+      <div class="alert-stat-card crit" title="Leads inbound aguardando primeira resposta acima do tempo ideal">
+        <div class="stat-content">
+          <h4>🚨 1º Contato Atrasado (>15m)</h4>
+          <div class="stat-value" id="val-alerta-contato">4 leads</div>
+          <div class="stat-sub">Tempo médio: <strong>38 min</strong> (Ideal: &lt; 15 min)</div>
+        </div>
+        <div class="stat-icon-wrap crit">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+      </div>
+
+      <!-- Card Alerta: Visitas Sem Parecer -->
+      <div class="alert-stat-card warn" title="Visitas realizadas sem preenchimento do parecer de retorno">
+        <div class="stat-content">
+          <h4>⚠️ Visitas Sem Parecer</h4>
+          <div class="stat-value" id="val-alerta-visitas">6 visitas</div>
+          <div class="stat-sub">Trava novas propostas no CRM</div>
+        </div>
+        <div class="stat-icon-wrap warn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+      </div>
+
+      <!-- Card Alerta: Follow-Up Vencido (>48h) -->
+      <div class="alert-stat-card crit" title="Clientes ativos na carteira sem qualquer interação há mais de 48h">
+        <div class="stat-content">
+          <h4>⏳ Em Alerta de SLA / Atenção</h4>
+          <div class="stat-value" id="val-alerta-followup">12 leads</div>
+          <div class="stat-sub">Risco de esfriar ou fechar com concorrente</div>
+        </div>
+        <div class="stat-icon-wrap crit">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+      </div>
+
+      <!-- Card Métrica: VGV Total em Negociação -->
+      <div class="alert-stat-card vgv" title="Volume Geral de Vendas em negociação quente e fechamento">
+        <div class="stat-content">
+          <h4>💰 VGV em Mesa de Fechamento</h4>
+          <div class="stat-value" id="val-vgv-total">R$ 5.832.000</div>
+          <div class="stat-sub" id="sub-vgv-total">9 propostas ativas em andamento</div>
+        </div>
+        <div class="stat-icon-wrap vgv">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+      </div>
+
+      <!-- Card Métrica: Esteira Pós-Venda (Chaves) -->
+      <div class="alert-stat-card ok" id="card-metric-pos" title="Contratos fechados em diligência e entrega de chaves">
+        <div class="stat-content">
+          <h4>🔑 Esteira ADM / Entrega de Chaves</h4>
+          <div class="stat-value" id="val-chaves-entregar">8 contratos</div>
+          <div class="stat-sub" id="sub-chaves-vgv">R$ 5.920.000 em tramitação cartorária</div>
+        </div>
+        <div class="stat-icon-wrap ok">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         CONTAINER DOS MÚLTIPLOS PIPELINES
+         ========================================================================== -->
+    <div class="pipelines-container">
+      
+      <!-- PIPELINE 1: PRÉ-VENDAS (SDR & QUALIFICAÇÃO) -->
+      <section class="pipeline-section" id="section-prevendas" data-pipe="prevendas">
+        <div class="pipeline-header">
+          <div class="pipeline-title-box">
+            <span class="pipeline-tag" style="background: var(--pipe-prevendas-bg); color: var(--pipe-prevendas); border: 1px solid var(--pipe-prevendas);">
+              Pipeline 01
+            </span>
+            <h3>🎯 Pré-Vendas & Qualificação de Leads (SDR)</h3>
+          </div>
+          <div class="pipeline-meta">
+            <div class="meta-stat">Volume Filtrado: <strong id="count-pipe-prevendas">14 leads</strong></div>
+            <div class="meta-stat">VGV Potencial: <strong id="vgv-pipe-prevendas" style="color: #C4B5FD;">R$ 8.420.000</strong></div>
+            <div class="meta-stat">SLA Médio de Contato: <strong style="color: #F87171;">38 min (Ideal: &lt;15m)</strong></div>
+          </div>
+        </div>
+
+        <div class="pipeline-columns-grid">
+          <!-- Coluna 1.1 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">📥 Novos Leads Inbound</span>
+                <span class="col-badge-count" id="badge-prevendas-novos">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: &lt; 15 min</span>
+                <span class="sla-badge crit">Méd: 38 min ⚠️</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-prevendas-novos"></div>
+          </div>
+
+          <!-- Coluna 1.2 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">📞 Tentativa de Contato</span>
+                <span class="col-badge-count" id="badge-prevendas-contato">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 4 horas</span>
+                <span class="sla-badge warn">Méd: 5.2h</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-prevendas-contato"></div>
+          </div>
+
+          <!-- Coluna 1.3 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🔍 Qualificação de Perfil</span>
+                <span class="col-badge-count" id="badge-prevendas-qualif">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 24 horas</span>
+                <span class="sla-badge ok">Méd: 21h ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-prevendas-qualif"></div>
+          </div>
+
+          <!-- Coluna 1.4 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">📅 Agendamento 1ª Visita</span>
+                <span class="col-badge-count" id="badge-prevendas-agendamento">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 48 horas</span>
+                <span class="sla-badge ok">Méd: 34h ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-prevendas-agendamento"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PIPELINE 2: VENDAS (VISITAS, SELEÇÃO E PROPOSTAS) -->
+      <section class="pipeline-section" id="section-vendas" data-pipe="vendas">
+        <div class="pipeline-header">
+          <div class="pipeline-title-box">
+            <span class="pipeline-tag" style="background: var(--pipe-vendas-bg); color: var(--pipe-vendas); border: 1px solid var(--pipe-vendas);">
+              Pipeline 02
+            </span>
+            <h3>💼 Vendas (Execução Comercial & Visitas)</h3>
+          </div>
+          <div class="pipeline-meta">
+            <div class="meta-stat">Atendimentos Ativos: <strong id="count-pipe-vendas">14 em campo</strong></div>
+            <div class="meta-stat">VGV em Carteira: <strong id="vgv-pipe-vendas" style="color: #93C5FD;">R$ 9.650.000</strong></div>
+            <div class="meta-stat">Gargalo SLA: <strong id="parecer-pipe-vendas" style="color: #F87171;">6 visitas sem parecer</strong></div>
+          </div>
+        </div>
+
+        <div class="pipeline-columns-grid">
+          <!-- Coluna 2.1 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🗓️ Visita Agendada</span>
+                <span class="col-badge-count" id="badge-vendas-agendada">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 3 dias</span>
+                <span class="sla-badge ok">Méd: 2.2 dias</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-vendas-agendada"></div>
+          </div>
+
+          <!-- Coluna 2.2 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🏠 Visita Feita (Parecer)</span>
+                <span class="col-badge-count" id="badge-vendas-parecer">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 24 horas</span>
+                <span class="sla-badge crit">Méd: 3.8 dias ⚠️</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-vendas-parecer"></div>
+          </div>
+
+          <!-- Coluna 2.3 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🤔 Em Análise / Decisão</span>
+                <span class="col-badge-count" id="badge-vendas-analise">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 5 dias</span>
+                <span class="sla-badge warn">Méd: 6.4 dias</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-vendas-analise"></div>
+          </div>
+
+          <!-- Coluna 2.4 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">📝 Proposta em Elaboração</span>
+                <span class="col-badge-count" id="badge-vendas-elaboracao">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 48 horas</span>
+                <span class="sla-badge ok">Méd: 31 horas ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-vendas-elaboracao"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PIPELINE 3: NEGOCIAÇÃO (CLOSER) -->
+      <section class="pipeline-section" id="section-closer" data-pipe="closer">
+        <div class="pipeline-header">
+          <div class="pipeline-title-box">
+            <span class="pipeline-tag" style="background: var(--pipe-closer-bg); color: var(--pipe-closer); border: 1px solid var(--pipe-closer);">
+              Pipeline 03
+            </span>
+            <h3>🤝 Negociação & Mesa de Fechamento (Closer)</h3>
+          </div>
+          <div class="pipeline-meta">
+            <div class="meta-stat">Propostas Ativas: <strong id="count-pipe-closer">9 negócios</strong></div>
+            <div class="meta-stat">VGV em Mesa: <strong id="vgv-pipe-closer" style="color: var(--gold-light);">R$ 5.832.000</strong></div>
+            <div class="meta-stat">Taxa de Sucesso: <strong>68.2%</strong></div>
+          </div>
+        </div>
+
+        <div class="pipeline-columns-grid">
+          <!-- Coluna 3.1 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">📄 Proposta Apresentada</span>
+                <span class="col-badge-count" id="badge-closer-apresentada">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 48 horas</span>
+                <span class="sla-badge warn">Méd: 52 horas</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-closer-apresentada"></div>
+          </div>
+
+          <!-- Coluna 3.2 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">⚖️ Em Contraproposta</span>
+                <span class="col-badge-count" id="badge-closer-contraproposta">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 72 horas</span>
+                <span class="sla-badge ok">Méd: 62 horas ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-closer-contraproposta"></div>
+          </div>
+
+          <!-- Coluna 3.3 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🎉 Aceite / Sinal Acordado</span>
+                <span class="col-badge-count" id="badge-closer-aceite">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA Ideal: 24 horas</span>
+                <span class="sla-badge ok">Méd: 14 horas ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-closer-aceite"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PIPELINE 4: PÓS-NEGOCIAÇÃO (ADM / JURÍDICO / CHAVES) -->
+      <section class="pipeline-section hidden" id="section-posvenda" data-pipe="posvenda">
+        <div class="pipeline-header">
+          <div class="pipeline-title-box">
+            <span class="pipeline-tag" style="background: var(--pipe-pos-bg); color: var(--pipe-pos); border: 1px solid var(--pipe-pos);">
+              Pipeline 04 • ADM & FIN
+            </span>
+            <h3>🔑 Pós-Negociação: Esteira Jurídica & Entrega das Chaves</h3>
+          </div>
+          <div class="pipeline-meta">
+            <div class="meta-stat">Contratos em Diligência: <strong id="count-pipe-pos">8 contratos</strong></div>
+            <div class="meta-stat">VGV em Tramitação: <strong id="vgv-pipe-pos" style="color: #34D399;">R$ 5.920.000</strong></div>
+            <div class="meta-stat">Tempo Médio Total: <strong>38 dias até as Chaves</strong></div>
+          </div>
+        </div>
+
+        <div class="pipeline-columns-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+          <!-- Coluna 4.1 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">📜 Certidões & Jurídico</span>
+                <span class="col-badge-count" id="badge-pos-certidoes">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA: 7 dias</span>
+                <span class="sla-badge warn">Méd: 8.5d</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-pos-certidoes"></div>
+          </div>
+
+          <!-- Coluna 4.2 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🏦 Financiamento / Banco</span>
+                <span class="col-badge-count" id="badge-pos-financiamento">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA: 15 dias</span>
+                <span class="sla-badge warn">Méd: 17.2d</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-pos-financiamento"></div>
+          </div>
+
+          <!-- Coluna 4.3 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🖋️ Minuta & Contrato</span>
+                <span class="col-badge-count" id="badge-pos-contrato">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA: 5 dias</span>
+                <span class="sla-badge ok">Méd: 4.1d ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-pos-contrato"></div>
+          </div>
+
+          <!-- Coluna 4.4 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🏛️ Escritura & Registro</span>
+                <span class="col-badge-count" id="badge-pos-registro">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA: 10 dias</span>
+                <span class="sla-badge ok">Méd: 9.8d ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-pos-registro"></div>
+          </div>
+
+          <!-- Coluna 4.5 -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="col-title-row">
+                <span class="col-title">🔑 Entrega das Chaves</span>
+                <span class="col-badge-count" id="badge-pos-chaves">0</span>
+              </div>
+              <div class="sla-indicator-bar">
+                <span class="sla-label">SLA: 3 dias</span>
+                <span class="sla-badge ok">Méd: 1.8d ✔</span>
+              </div>
+            </div>
+            <div class="column-cards-list" id="cards-pos-chaves"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ==========================================================================
+         SEÇÃO SPLIT: RANKING DE CORRETORES & GRÁFICOS ANIMADOS
+         ========================================================================== -->
+    <div class="analytics-row">
+      
+      <!-- RANKING GAMIFICADO DOS CORRETORES -->
+      <div class="panel-box">
+        <div class="panel-box-header">
+          <h3>🏆 Ranking de Performance (Clique para Filtrar)</h3>
+          <span style="font-size: 11px; color: var(--gold-light); font-weight: 700; font-family: var(--font-mono);">
+            SETEMBRO / 2026
+          </span>
+        </div>
+        <div class="ranking-list" id="ranking-container">
+          <!-- Injetado via Javascript -->
+        </div>
+      </div>
+
+      <!-- PAINEL DE GRÁFICOS ANIMADOS -->
+      <div class="panel-box">
+        <div class="panel-box-header">
+          <h3>📊 Inteligência de Conversão & SLAs</h3>
+          <div class="chart-tabs">
+            <button class="btn-chart-tab active" data-chart="funnel">Funil Geral</button>
+            <button class="btn-chart-tab" data-chart="vgv">VGV por Etapa</button>
+            <button class="btn-chart-tab" data-chart="sla">SLA Ideal vs Real</button>
+          </div>
+        </div>
+        <div class="chart-container-box" id="apex-chart-container">
+          <!-- Gráfico renderizado dinamicamente -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==========================================================================
+         TICKER DIGITAL ANIMADO NO RODAPÉ DO TELÃO
+         ========================================================================== -->
+    <div class="news-ticker-bar">
+      <div class="ticker-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Radar Rhema
+      </div>
+      <div class="ticker-content">
+        <div class="ticker-track" id="ticker-track">
+          <span class="ticker-item"><span class="tag">FECHAMENTO</span> <strong>Tatiana Oliveira</strong> formalizou proposta de <strong>R$ 820.000</strong> no Embaré!</span>
+          <span class="ticker-item"><span class="tag">ALERTA SLA</span> <strong>4 leads novos</strong> aguardando 1º contato há mais de 15 minutos!</span>
+          <span class="ticker-item"><span class="tag">VISITAS</span> <strong>Roseli Lopes</strong> confirmou 3 novas visitas no Gonzaga para amanhã.</span>
+          <span class="ticker-item"><span class="tag">ADM / CHAVES</span> Contrato <strong>AP-7301</strong> teve escritura assinada e chaves agendadas para sexta-feira! 🔑</span>
+          <span class="ticker-item"><span class="tag">PERFORMANCE</span> <strong>Flávia Mattos</strong> atingiu 14.8% de taxa de conversão em propostas.</span>
+          <span class="ticker-item"><span class="tag">NOVO LEAD</span> Oportunidade Inbound via Zap Imóveis para Apartamento 3 dorms na Ponta da Praia.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==========================================================================
+       MODAL DE DETALHES DO ATENDIMENTO
+       ========================================================================== -->
+  <div class="modal-overlay" id="lead-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-lead-title">Detalhes do Lead</h3>
+        <button class="btn-modal-close" id="btn-close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Cliente</label>
+            <p id="modal-lead-name">--</p>
+          </div>
+          <div class="detail-item">
+            <label>Telefone / WhatsApp</label>
+            <p id="modal-lead-phone">--</p>
+          </div>
+          <div class="detail-item">
+            <label>Origem / Mídia</label>
+            <p id="modal-lead-origin">--</p>
+          </div>
+          <div class="detail-item">
+            <label>Corretor Responsável</label>
+            <p id="modal-lead-broker">--</p>
+          </div>
+          <div class="detail-item">
+            <label>Etapa Atual</label>
+            <p id="modal-lead-stage">--</p>
+          </div>
+          <div class="detail-item">
+            <label>Tempo na Etapa (SLA)</label>
+            <p id="modal-lead-time">--</p>
+          </div>
+          <div class="detail-item" style="grid-column: span 2;">
+            <label>Imóvel de Interesse / Valor Estimado</label>
+            <p id="modal-lead-prop">--</p>
+          </div>
+          <div class="detail-item" style="grid-column: span 2;">
+            <label>Diagnóstico do Atendimento & Ação Recomendada</label>
+            <p id="modal-lead-diag" style="font-weight: 400; color: #E2E8F0;">--</p>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-celebrate" id="btn-modal-celebrate">🎉 Comemorar Avanço!</button>
+          <a href="#" target="_blank" class="btn-action-wa" id="modal-btn-wa">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086.159.058 1.011.477 1.184.564.173.087.289.13.332.202.043.073.043.419-.101.824z"/></svg>
+            Abrir WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       LÓGICA EM JAVASCRIPT: TIMER 30M, FILTROS (CORRETOR + PERÍODO) E CHARTS
+       ========================================================================== -->
+  <script>
+    // Configurações do Timer (30 minutos = 1800 segundos)
+    const REFRESH_INTERVAL_SECONDS = 60; // 1 minuto (VPS 24h)
+    let secondsRemaining = REFRESH_INTERVAL_SECONDS;
+    let timerInterval = null;
+    let autoLoopInterval = null;
+    let currentChartInstance = null;
+    let activeChartType = 'funnel';
+
+    // Estado dos Filtros Ativos
+    let currentBrokerFilter = 'all';
+    let currentPeriodFilter = 'all';
+
+    // Base de Corretores Reais da Rhema Imóveis
+    const CORRETORES_RHEMA = [
+      { nome: "Tatiana Gonçalves de Oliveira", apelido: "Tatiana", avatar: "TG", vgv: "R$ 2.881.000", visitas: 68, propostas: 7, conv: "10.3%", score: 98, badge: "🥇 Top Closer" },
+      { nome: "Flávia Mara de Mattos", apelido: "Flávia", avatar: "FM", vgv: "R$ 2.350.000", visitas: 27, propostas: 4, conv: "14.8%", score: 94, badge: "🥈 Alta Conversão" },
+      { nome: "Roseli de Carvalho Lopes", apelido: "Roseli", avatar: "RL", vgv: "R$ 1.860.000", visitas: 26, propostas: 4, conv: "15.4%", score: 92, badge: "🥉 Mestre da Mesa" },
+      { nome: "Leniára R. M. Araújo", apelido: "Leniára", avatar: "LA", vgv: "R$ 1.610.000", visitas: 45, propostas: 3, conv: "6.7%", score: 85, badge: "Visitas em Alta" },
+      { nome: "Luana Cardoso", apelido: "Luana", avatar: "LC", vgv: "R$ 860.000", visitas: 46, propostas: 2, conv: "4.3%", score: 78, badge: "Engajamento Forte" },
+      { nome: "Elaine do Nascimento", apelido: "Elaine", avatar: "EN", vgv: "R$ 700.000", visitas: 39, propostas: 2, conv: "5.1%", score: 76, badge: "Captação Ativa" }
+    ];
+
+    // Oportunidades detalhadas nos 4 pipelines (com diasAtras e valorNum para filtragem dinâmica por período e corretor)
+    const PIPELINE_DATA = {
+      prevendas: {
+        novos: [
+          { id: 101, nome: "Nathyelle Machado", tel: "(13) 99771-3108", midia: "Zap Imóveis", prop: "Apto 2 dorms • Aparecida", val: "R$ 480.000", valorNum: 480000, corretor: "Tatiana", tempo: "45 min", diasAtras: 0, slaStatus: "crit", diag: "Lead entrou há 45 min e ainda não recebeu primeira mensagem." },
+          { id: 102, nome: "Gabriel Francisco Rocha", tel: "(13) 99109-5721", midia: "Zap Imóveis", prop: "Apto 3 dorms • Ponta da Praia", val: "R$ 750.000", valorNum: 750000, corretor: "Tatiana", tempo: "1h 10m", diasAtras: 0, slaStatus: "crit", diag: "Lead quente com busca definida, acima do SLA de 15 minutos." },
+          { id: 103, nome: "Junior", tel: "(21) 99000-5980", midia: "Zap Imóveis", prop: "Kitnet / 1 dorm • Gonzaga", val: "R$ 290.000", valorNum: 290000, corretor: "Tatiana", tempo: "22 min", diasAtras: 0, slaStatus: "warn", diag: "Aguardando envio de opções pelo SDR." },
+          { id: 104, nome: "Priscila Pinto", tel: "(11) 99665-6277", midia: "Zap Imóveis", prop: "Apto 4 dorms • Ponta da Praia", val: "R$ 1.700.000", valorNum: 1700000, corretor: "Elaine", tempo: "18 min", diasAtras: 1, slaStatus: "warn", diag: "Ticket alto, prioridade máxima de atendimento imediato." },
+          { id: 112, nome: "Renatta Lima", tel: "(13) 99628-8928", midia: "Chaves na Mão", prop: "Apto 2 dorms • Ponta da Praia", val: "R$ 468.000", valorNum: 468000, corretor: "Roseli", tempo: "35 min", diasAtras: 0, slaStatus: "crit", diag: "Cliente solicitou retorno urgente pelo WhatsApp." },
+          { id: 113, nome: "Marta Santos", tel: "(13) 98812-9456", midia: "Chaves na Mão", prop: "Kitnet • Ponta da Praia", val: "R$ 354.000", valorNum: 354000, corretor: "Leniára", tempo: "12 min", diasAtras: 0, slaStatus: "ok", diag: "Entrou agora na fila de distribuição." }
+        ],
+        contato: [
+          { id: 105, nome: "Barbarah Camargo", tel: "(11) 96114-8608", midia: "Chaves na Mão", prop: "Apto Centro • R$ 264 mil", val: "R$ 264.000", valorNum: 264000, corretor: "Elaine", tempo: "5.8 horas", diasAtras: 5, slaStatus: "warn", diag: "Primeiro contato enviado pelo WhatsApp, aguardando confirmação de recebimento." },
+          { id: 106, nome: "Alexandre Otuki", tel: "(11) 98193-0016", midia: "Zap Imóveis", prop: "Apto 2 dorms • Ponta da Praia", val: "R$ 636.000", valorNum: 636000, corretor: "Elaine", tempo: "4.2 horas", diasAtras: 6, slaStatus: "warn", diag: "Cliente visualizou a mensagem, requer segunda tentativa." },
+          { id: 107, nome: "Vitor Silva", tel: "(13) 99202-8630", midia: "Viva Real", prop: "Apto 3 dorms • Gonzaguinha", val: "R$ 642.000", valorNum: 642000, corretor: "Leniára", tempo: "2.1 horas", diasAtras: 4, slaStatus: "ok", diag: "Apresentando catálogo inicial de opções." },
+          { id: 114, nome: "Nathalia Araujo", tel: "(13) 97407-8816", midia: "Instagram", prop: "Apto 3 dorms • Embaré", val: "R$ 1.020.000", valorNum: 1020000, corretor: "Roseli", tempo: "3.5 horas", diasAtras: 3, slaStatus: "ok", diag: "Enviado vídeo dos imóveis selecionados." }
+        ],
+        qualif: [
+          { id: 108, nome: "Vicente Martins", tel: "(41) 99932-7799", midia: "Recepção", prop: "Kitnet • Qualquer bairro", val: "R$ 280.000", valorNum: 280000, corretor: "Tatiana", tempo: "18 horas", diasAtras: 3, slaStatus: "ok", diag: "Cliente com recurso à vista, definindo se prefere Gonzaga ou Boqueirão." },
+          { id: 109, nome: "Gabi Ornstein", tel: "(11) 99511-1548", midia: "Chaves na Mão", prop: "Sobrado 3 dorms • Aparecida", val: "R$ 828.000", valorNum: 828000, corretor: "Luana", tempo: "23 horas", diasAtras: 12, slaStatus: "ok", diag: "Simulação de financiamento realizada com sucesso." },
+          { id: 115, nome: "Dayana Batista", tel: "(13) 99171-9888", midia: "Zap Imóveis", prop: "Apto 1 dorm • Centro", val: "R$ 306.000", valorNum: 306000, corretor: "Leniára", tempo: "19 horas", diasAtras: 7, slaStatus: "ok", diag: "Qualificando renda familiar para aprovação Caixa." },
+          { id: 116, nome: "Ricardo Alencar", tel: "(13) 99711-2200", midia: "Indicação", prop: "Cobertura • Gonzaga", val: "R$ 1.450.000", valorNum: 1450000, corretor: "Flávia", tempo: "14 horas", diasAtras: 2, slaStatus: "ok", diag: "Investidor qualificado buscando vista mar." }
+        ],
+        agendamento: [
+          { id: 110, nome: "Bete", tel: "(13) 98162-7596", midia: "Recepção", prop: "Apto 1 dorm • Embaré", val: "R$ 450.000", valorNum: 450000, corretor: "Tatiana", tempo: "32 horas", diasAtras: 1, slaStatus: "ok", diag: "Gostou de 4 imóveis no catálogo virtual, alinhando visita presencial para amanhã." },
+          { id: 111, nome: "Irineu Moraes", tel: "(11) 97650-6383", midia: "Chaves na Mão", prop: "Apto 2 dorms • Ponta da Praia", val: "R$ 550.000", valorNum: 550000, corretor: "Elaine", tempo: "28 horas", diasAtras: 14, slaStatus: "ok", diag: "Agendando chaves com proprietário do imóvel AP-6223." },
+          { id: 117, nome: "Simone Freitas", tel: "(18) 99721-1054", midia: "Viva Real", prop: "Apto 2 dorms • Aparecida", val: "R$ 450.000", valorNum: 450000, corretor: "Tatiana", tempo: "26 horas", diasAtras: 5, slaStatus: "ok", diag: "Confirmando roteiro de 3 visitas para sábado." }
+        ]
+      },
+      vendas: {
+        agendada: [
+          { id: 201, nome: "Carolina Moliterno", tel: "(13) 99730-4849", midia: "Instagram", prop: "Apto 3 dorms • Embaré", val: "R$ 1.020.000", valorNum: 1020000, corretor: "Tatiana", tempo: "Hoje 16h", diasAtras: 0, slaStatus: "ok", diag: "Visita confirmada pelo WhatsApp, corretora a caminho." },
+          { id: 202, nome: "Vitor Guilherme", tel: "(13) 98801-3009", midia: "Instagram", prop: "Apto 2 dorms • Ponta da Praia", val: "R$ 450.000", valorNum: 450000, corretor: "Elaine", tempo: "Hoje 17h30", diasAtras: 3, slaStatus: "ok", diag: "Visita dupla com casal." },
+          { id: 203, nome: "Giselene de Souza", tel: "(13) 99153-4075", midia: "Zap Imóveis", prop: "Apto 2 dorms • Estuário", val: "R$ 358.000", valorNum: 358000, corretor: "Roseli", tempo: "Amanhã 10h", diasAtras: 5, slaStatus: "ok", diag: "Visita agendada com zeladoria." },
+          { id: 212, nome: "Fernanda Beatriz", tel: "(13) 99157-8811", midia: "Chaves na Mão", prop: "Apto 2 dorms • Boqueirão", val: "R$ 590.000", valorNum: 590000, corretor: "Flávia", tempo: "Amanhã 14h", diasAtras: 2, slaStatus: "ok", diag: "Roteiro com 2 apartamentos reformados." },
+          { id: 213, nome: "Evandro Costa", tel: "(13) 98171-5556", midia: "Indicação", prop: "Apto 2 dorms • Embaré", val: "R$ 610.000", valorNum: 610000, corretor: "Luana", tempo: "Sexta 11h", diasAtras: 6, slaStatus: "ok", diag: "Cliente vem de São Paulo especialmente para a visita." }
+        ],
+        parecer: [
+          { id: 204, nome: "Bona Cultri", tel: "(16) 99104-3191", midia: "Zap Imóveis", prop: "Apto 3 dorms • Embaré", val: "R$ 680.000", valorNum: 680000, corretor: "Tatiana", tempo: "33 dias 🚨", diasAtras: 33, slaStatus: "crit", diag: "Gostou de 3 imóveis e continua sem parecer registrado no sistema!" },
+          { id: 205, nome: "Cristina Carvalho", tel: "(13) 98227-7400", midia: "Indicação", prop: "Apto • Ponta da Praia", val: "R$ 520.000", valorNum: 520000, corretor: "Elaine", tempo: "11 dias 🚨", diasAtras: 11, slaStatus: "crit", diag: "Visita realizada, aguarda parecer formal no CRM." },
+          { id: 206, nome: "Caio Bevilacqua", tel: "(11) 93466-3008", midia: "Recepção", prop: "Apto 3 dorms • Gonzaga", val: "R$ 790.000", valorNum: 790000, corretor: "Leniára", tempo: "6 dias ⚠️", diasAtras: 6, slaStatus: "warn", diag: "Cliente adorou a varanda gourmet, aguarda contrapartida da corretora." },
+          { id: 207, nome: "Thais", tel: "(13) 99735-4283", midia: "Instagram", prop: "Apto 2 dorms • Aparecida", val: "R$ 430.000", valorNum: 430000, corretor: "Roseli", tempo: "3 dias ⚠️", diasAtras: 3, slaStatus: "warn", diag: "Cliente solicitou dados de condomínio e IPTU." },
+          { id: 214, nome: "José Luís Cogo", tel: "(11) 99333-1442", midia: "Grupo OLX", prop: "Apto 2 dorms • Embaré", val: "R$ 636.000", valorNum: 636000, corretor: "Tatiana", tempo: "5 dias 🚨", diasAtras: 5, slaStatus: "crit", diag: "1 visita sem parecer — trava proposta no sistema." },
+          { id: 215, nome: "Marylay", tel: "(69) 9201-6446", midia: "Grupo OLX", prop: "Apto 2 dorms • Gonzaga", val: "R$ 540.000", valorNum: 540000, corretor: "Roseli", tempo: "4 dias ⚠️", diasAtras: 4, slaStatus: "warn", diag: "Registrar feedback da visita realizada." }
+        ],
+        analise: [
+          { id: 208, nome: "Tiago Oliveira", tel: "(11) 94547-0450", midia: "Instagram", prop: "Apto 2 dorms • Embaré", val: "R$ 800.000", valorNum: 800000, corretor: "Roseli", tempo: "4.8 dias", diasAtras: 4, slaStatus: "ok", diag: "Decidindo entre 2 unidades do mesmo empreendimento." },
+          { id: 209, nome: "Júnior Barbosa", tel: "(13) 98123-5542", midia: "Indicação", prop: "Apto 1 dorm • Macuco", val: "R$ 460.000", valorNum: 460000, corretor: "Elaine", tempo: "6.1 dias", diasAtras: 6, slaStatus: "warn", diag: "Cliente negociando com a família a liberação do FGTS." },
+          { id: 216, nome: "Gabriela Maria", tel: "(11) 98691-5473", midia: "Indicação", prop: "Apto 2 dorms • Aparecida", val: "R$ 580.000", valorNum: 580000, corretor: "Leniára", tempo: "7 dias", diasAtras: 18, slaStatus: "warn", diag: "Gostou de 2 imóveis na visita, avaliando reforma." }
+        ],
+        elaboracao: [
+          { id: 210, nome: "Roberto Simões", tel: "(15) 99796-5584", midia: "Instagram", prop: "Apto 2 dorms • Aparecida", val: "R$ 1.320.000", valorNum: 1320000, corretor: "Luana", tempo: "28 horas", diasAtras: 7, slaStatus: "ok", diag: "Montando proposta com entrada facilitada e permuta de veículo." },
+          { id: 211, nome: "Graziela Lemos", tel: "(13) 99180-1999", midia: "Zap Imóveis", prop: "Apto 3 dorms • Boqueirão", val: "R$ 770.000", valorNum: 770000, corretor: "Elaine", tempo: "34 horas", diasAtras: 3, slaStatus: "ok", diag: "Verificando valor de entrada para apresentar ao proprietário." },
+          { id: 217, nome: "Henrique Prado", tel: "(11) 99945-0794", midia: "Indicação", prop: "Apto 3 dorms • Gonzaga", val: "R$ 940.000", valorNum: 940000, corretor: "Flávia", tempo: "18 horas", diasAtras: 1, slaStatus: "ok", diag: "Formatando proposta formal à vista." }
+        ]
+      },
+      closer: {
+        apresentada: [
+          { id: 301, nome: "José Madson Costa", tel: "(13) 98172-0124", midia: "Zap Imóveis", prop: "Apto 2 dorms • Ref AP-5418", val: "R$ 242.000", valorNum: 242000, corretor: "Tatiana", tempo: "52 horas", diasAtras: 22, slaStatus: "warn", diag: "Proposta protocolada com proprietário, aguardando retorno até as 18h." },
+          { id: 302, nome: "Patricia Mota", tel: "(13) 99685-1418", midia: "Instagram", prop: "Apto 3 dorms • Aparecida", val: "R$ 790.000", valorNum: 790000, corretor: "Leniára", tempo: "38 horas", diasAtras: 14, slaStatus: "ok", diag: "Proposta enviada com 5% de desconto à vista." },
+          { id: 303, nome: "Marcia Ferreira", tel: "(13) 99165-4709", midia: "Instagram", prop: "Apto 3 dorms • Embaré", val: "R$ 770.000", valorNum: 770000, corretor: "Roseli", tempo: "44 horas", diasAtras: 3, slaStatus: "ok", diag: "Apresentada presencialmente ao proprietário." },
+          { id: 308, nome: "Dr. Alberto Quintas", tel: "(13) 99784-6668", midia: "Indicação", prop: "Apto Alto Padrão • Boqueirão", val: "R$ 1.150.000", valorNum: 1150000, corretor: "Flávia", tempo: "20 horas", diasAtras: 2, slaStatus: "ok", diag: "Proposta formalizada com sinal de 20%." }
+        ],
+        contraproposta: [
+          { id: 304, nome: "Victor Hugo", tel: "(11) 98679-1350", midia: "Indicação", prop: "Apto 2 dorms • Aparecida", val: "R$ 710.000", valorNum: 710000, corretor: "Luana", tempo: "62 horas", diasAtras: 10, slaStatus: "ok", diag: "Proprietário pediu contraproposta de R$ 725k com mobília inclusa." },
+          { id: 305, nome: "Helio Gomes", tel: "(13) 99749-6302", midia: "Zap Imóveis", prop: "Sobrado 3 dorms • Estuário", val: "R$ 1.040.000", valorNum: 1040000, corretor: "Leniára", tempo: "58 horas", diasAtras: 6, slaStatus: "ok", diag: "Ajustando forma de pagamento do sinal (TED + 30 dias)." },
+          { id: 309, nome: "Guilherme Oliveira", tel: "(16) 99962-0385", midia: "Grupo OLX", prop: "Apto 3 dorms • Gonzaga", val: "R$ 730.000", valorNum: 730000, corretor: "Elaine", tempo: "48 horas", diasAtras: 11, slaStatus: "ok", diag: "Negociando diferença de R$ 15.000 no valor final." }
+        ],
+        aceite: [
+          { id: 306, nome: "Bete & Família", tel: "(13) 98162-7596", midia: "Recepção", prop: "Apto 1 dorm • Embaré", val: "R$ 440.000", valorNum: 440000, corretor: "Tatiana", tempo: "12 horas", diasAtras: 0, slaStatus: "ok", diag: "Proposta aceita! Sinal de R$ 50.000 acordado para amanhã." },
+          { id: 307, nome: "Dean Rodrigues", tel: "(41) 9669-7771", midia: "Captação", prop: "Apto 2 dorms • Ponta da Praia", val: "R$ 390.000", valorNum: 390000, corretor: "Roseli", tempo: "16 horas", diasAtras: 3, slaStatus: "ok", diag: "Acordo selado com ambas as partes. Encaminhado para minuta contratual." },
+          { id: 310, nome: "Cláudia & Renato", tel: "(13) 98807-7538", midia: "Indicação", prop: "Apto 3 dorms • Embaré", val: "R$ 820.000", valorNum: 820000, corretor: "Flávia", tempo: "8 horas", diasAtras: 1, slaStatus: "ok", diag: "Aceite assinado hoje! Comemoração na sala de vendas." }
+        ]
+      },
+      posvenda: {
+        certidoes: [
+          { id: 401, nome: "Eduardo & Lilian", tel: "(11) 98390-1987", midia: "Indicação", prop: "Apto Gonzaga • R$ 850.000", val: "R$ 850.000", valorNum: 850000, corretor: "Flávia", tempo: "6 dias", diasAtras: 6, slaStatus: "ok", diag: "Levantamento de certidões pessoais e CNDs trabalhistas em andamento." },
+          { id: 402, nome: "Marcos Del Papa", tel: "(13) 99104-6776", midia: "Zap Imóveis", prop: "Apto Boqueirão • R$ 680.000", val: "R$ 680.000", valorNum: 680000, corretor: "Tatiana", tempo: "9 dias", diasAtras: 9, slaStatus: "warn", diag: "Aguardando certidão de quitação de condomínio da administradora." }
+        ],
+        financiamento: [
+          { id: 403, nome: "Guilherme Simões", tel: "(13) 98184-8384", midia: "Chaves na Mão", prop: "Apto Aparecida • R$ 520.000", val: "R$ 520.000", valorNum: 520000, corretor: "Tatiana", tempo: "16 dias", diasAtras: 16, slaStatus: "warn", diag: "Laudo de engenharia da Caixa concluído, aguardando emissão do contrato bancário." },
+          { id: 404, nome: "Fabiana Simão", tel: "(11) 97988-6369", midia: "Grupo OLX", prop: "Apto Embaré • R$ 740.000", val: "R$ 740.000", valorNum: 740000, corretor: "Roseli", tempo: "12 dias", diasAtras: 12, slaStatus: "ok", diag: "Crédito Itaú aprovado, minuta bancária em conferência." }
+        ],
+        contrato: [
+          { id: 405, nome: "Roberta Andrade", tel: "(13) 99191-9365", midia: "Zap Imóveis", prop: "Apto Aparecida • R$ 310.000", val: "R$ 310.000", valorNum: 310000, corretor: "Roseli", tempo: "4 dias", diasAtras: 4, slaStatus: "ok", diag: "Minuta aprovada pelas partes. Assinatura digital via Docusign agendada para hoje." },
+          { id: 406, nome: "Tassi Ferreira", tel: "(13) 99116-4641", midia: "Indicação", prop: "Apto Embaré • R$ 890.000", val: "R$ 890.000", valorNum: 890000, corretor: "Roseli", tempo: "3 dias", diasAtras: 3, slaStatus: "ok", diag: "Contrato de Compra e Venda assinado, sinal compensado com sucesso." }
+        ],
+        registro: [
+          { id: 407, nome: "Lucas Castro", tel: "(13) 97408-9852", midia: "Zap Imóveis", prop: "Apto Ponta da Praia • R$ 980.000", val: "R$ 980.000", valorNum: 980000, corretor: "Tatiana", tempo: "8 dias", diasAtras: 8, slaStatus: "ok", diag: "ITBI recolhido, escritura lavrada no 2º Cartório de Notas, protocolada no 1º RGI de Santos." }
+        ],
+        chaves: [
+          { id: 408, nome: "Paulo Roberto Bastos", tel: "(11) 95360-5626", midia: "Zap Imóveis", prop: "Apto Aparecida • R$ 950.000", val: "R$ 950.000", valorNum: 950000, corretor: "Tatiana", tempo: "2 dias", diasAtras: 2, slaStatus: "ok", diag: "Vistoria de desocupação aprovada! Entrega solene das chaves marcada para amanhã às 14h! 🔑" }
+        ]
+      }
+    };
+
+    // ==========================================================================
+    // INICIALIZAÇÃO & FUNÇÕES DE RENDERIZAÇÃO
+    // ==========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      initClock();
+      initAutoRefresh();
+      applyFiltersAndRender();
+      setupEventListeners();
+    });
+
+    // Função utilitária para filtrar um card conforme corretor e período selecionados
+    function matchesFilter(item) {
+      // Filtro de corretor
+      if (currentBrokerFilter !== 'all' && item.corretor !== currentBrokerFilter) {
+        return false;
+      }
+      // Filtro de período (baseado em diasAtras)
+      const d = item.diasAtras ?? 0;
+      if (currentPeriodFilter === 'hoje' && d > 1) return false;
+      if (currentPeriodFilter === '7d' && d > 7) return false;
+      if (currentPeriodFilter === '15d' && d > 15) return false;
+      if (currentPeriodFilter === '30d' && d > 30) return false;
+      if (currentPeriodFilter === '90d' && d > 90) return false;
+      return true;
+    }
+
+    function formatBRL(val) {
+      return 'R$ ' + Number(val || 0).toLocaleString('pt-BR');
+    }
+
+    // Aplica filtros e atualiza todos os componentes do painel
+    function applyFiltersAndRender() {
+      // Atualiza UI dos controles de filtro
+      const isFiltered = currentBrokerFilter !== 'all' || currentPeriodFilter !== 'all';
+      const clearBtn = document.getElementById('btn-clear-filters');
+      const banner = document.getElementById('active-filter-banner');
+      const bannerText = document.getElementById('active-filter-text');
+
+      if (clearBtn) clearBtn.classList.toggle('visible', isFiltered);
+      if (banner) {
+        banner.classList.toggle('show', isFiltered);
+        const brokerLabel = currentBrokerFilter === 'all' ? 'Todos os Corretores' : `Corretor(a): ${currentBrokerFilter}`;
+        const periodMap = {
+          all: 'Todo o Período',
+          hoje: 'Hoje (Últimas 24h)',
+          '7d': 'Últimos 7 dias',
+          '15d': 'Últimos 15 dias',
+          '30d': 'Últimos 30 dias',
+          '90d': 'Últimos 90 dias'
+        };
+        bannerText.innerHTML = `🔍 <strong>Filtro Ativo no Pipeline:</strong> ${brokerLabel} &nbsp;•&nbsp; ${periodMap[currentPeriodFilter] || 'Todo o Período'}`;
+      }
+
+      renderAllCards();
+      renderRanking();
+      renderChart(activeChartType);
+    }
+
+    // Relógio Digital
+    function initClock() {
+      const clockEl = document.getElementById('clock-display');
+      const dateEl = document.getElementById('date-display');
+      
+      function update() {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString('pt-BR');
+        
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        const dateStr = now.toLocaleDateString('pt-BR', options);
+        dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // Timer Regressivo de 30 Minutos (Auto-Refresh)
+    function initAutoRefresh() {
+      const timerText = document.getElementById('timer-text');
+      const progressCircle = document.getElementById('timer-progress-circle');
+      
+      timerInterval = setInterval(() => {
+        secondsRemaining--;
+        if (secondsRemaining <= 0) {
+          triggerRefresh(true);
+          secondsRemaining = REFRESH_INTERVAL_SECONDS;
+        }
+        
+        // Atualiza texto MM:SS
+        const mins = Math.floor(secondsRemaining / 60);
+        const secs = secondsRemaining % 60;
+        timerText.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        
+        // Atualiza anel SVG
+        const percent = ((REFRESH_INTERVAL_SECONDS - secondsRemaining) / REFRESH_INTERVAL_SECONDS) * 100;
+        progressCircle.style.strokeDashoffset = 100 - percent;
+      }, 1000);
+    }
+
+    // Ação de Atualização com Animação Shimmer e Som Opcional
+    async function triggerRefresh(isAutomatic = false) {
+      const btn = document.getElementById('btn-manual-refresh');
+      if (btn) {
+        btn.classList.add('spinning');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spinning" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg> Sincronizando Imoview...`;
+        
+        try {
+          const res = await fetch('/api/pipeline');
+          if (res.ok) {
+            const data = await res.json();
+            console.log('[Imoview 1-Min Live Sync]', data);
+            
+            // Atualiza status online no cabeçalho
+            const statusBadge = document.querySelector('.live-badge');
+            if (statusBadge) {
+              statusBadge.innerHTML = `<span class="pulse-dot"></span> Imoview API Online • Sincronizado a cada 1 min`;
+            }
+          }
+        } catch (e) {
+          console.warn('[Imoview Sync Offline]', e.message);
+        } finally {
+          setTimeout(() => {
+            btn.classList.remove('spinning');
+            btn.innerHTML = originalText;
+            secondsRemaining = REFRESH_INTERVAL_SECONDS;
+            applyFiltersAndRender();
+            if (!isAutomatic) playSubtleBeep();
+          }, 600);
+        }
+      }
+    }
+
+    // Beep sintético suave via Web Audio API
+    function playSubtleBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {}
+    }
+
+    // Renderiza Cards nos Kanbans e recalcula KPIs dinamicamente
+    function renderAllCards() {
+      // Filtra todas as listas
+      const pvNovos = PIPELINE_DATA.prevendas.novos.filter(matchesFilter);
+      const pvContato = PIPELINE_DATA.prevendas.contato.filter(matchesFilter);
+      const pvQualif = PIPELINE_DATA.prevendas.qualif.filter(matchesFilter);
+      const pvAgend = PIPELINE_DATA.prevendas.agendamento.filter(matchesFilter);
+
+      const vdAgend = PIPELINE_DATA.vendas.agendada.filter(matchesFilter);
+      const vdParecer = PIPELINE_DATA.vendas.parecer.filter(matchesFilter);
+      const vdAnalise = PIPELINE_DATA.vendas.analise.filter(matchesFilter);
+      const vdElab = PIPELINE_DATA.vendas.elaboracao.filter(matchesFilter);
+
+      const clApres = PIPELINE_DATA.closer.apresentada.filter(matchesFilter);
+      const clContra = PIPELINE_DATA.closer.contraproposta.filter(matchesFilter);
+      const clAceite = PIPELINE_DATA.closer.aceite.filter(matchesFilter);
+
+      const posCert = PIPELINE_DATA.posvenda.certidoes.filter(matchesFilter);
+      const posFin = PIPELINE_DATA.posvenda.financiamento.filter(matchesFilter);
+      const posCont = PIPELINE_DATA.posvenda.contrato.filter(matchesFilter);
+      const posReg = PIPELINE_DATA.posvenda.registro.filter(matchesFilter);
+      const posChav = PIPELINE_DATA.posvenda.chaves.filter(matchesFilter);
+
+      // Renderiza colunas Pré-Vendas
+      renderCardColumn('cards-prevendas-novos', 'badge-prevendas-novos', pvNovos);
+      renderCardColumn('cards-prevendas-contato', 'badge-prevendas-contato', pvContato);
+      renderCardColumn('cards-prevendas-qualif', 'badge-prevendas-qualif', pvQualif);
+      renderCardColumn('cards-prevendas-agendamento', 'badge-prevendas-agendamento', pvAgend);
+
+      // Renderiza colunas Vendas
+      renderCardColumn('cards-vendas-agendada', 'badge-vendas-agendada', vdAgend);
+      renderCardColumn('cards-vendas-parecer', 'badge-vendas-parecer', vdParecer);
+      renderCardColumn('cards-vendas-analise', 'badge-vendas-analise', vdAnalise);
+      renderCardColumn('cards-vendas-elaboracao', 'badge-vendas-elaboracao', vdElab);
+
+      // Renderiza colunas Closer
+      renderCardColumn('cards-closer-apresentada', 'badge-closer-apresentada', clApres);
+      renderCardColumn('cards-closer-contraproposta', 'badge-closer-contraproposta', clContra);
+      renderCardColumn('cards-closer-aceite', 'badge-closer-aceite', clAceite);
+
+      // Renderiza colunas Pós-Venda
+      renderCardColumn('cards-pos-certidoes', 'badge-pos-certidoes', posCert);
+      renderCardColumn('cards-pos-financiamento', 'badge-pos-financiamento', posFin);
+      renderCardColumn('cards-pos-contrato', 'badge-pos-contrato', posCont);
+      renderCardColumn('cards-pos-registro', 'badge-pos-registro', posReg);
+      renderCardColumn('cards-pos-chaves', 'badge-pos-chaves', posChav);
+
+      // Recalcula Totais por Pipeline
+      const allPrevendas = [...pvNovos, ...pvContato, ...pvQualif, ...pvAgend];
+      const allVendas = [...vdAgend, ...vdParecer, ...vdAnalise, ...vdElab];
+      const allCloser = [...clApres, ...clContra, ...clAceite];
+      const allPos = [...posCert, ...posFin, ...posCont, ...posReg, ...posChav];
+
+      const sumVgv = arr => arr.reduce((acc, x) => acc + (x.valorNum || 0), 0);
+
+      document.getElementById('count-pipe-prevendas').textContent = `${allPrevendas.length} leads`;
+      document.getElementById('vgv-pipe-prevendas').textContent = formatBRL(sumVgv(allPrevendas));
+
+      document.getElementById('count-pipe-vendas').textContent = `${allVendas.length} em campo`;
+      document.getElementById('vgv-pipe-vendas').textContent = formatBRL(sumVgv(allVendas));
+      document.getElementById('parecer-pipe-vendas').textContent = `${vdParecer.length} visitas sem parecer`;
+
+      document.getElementById('count-pipe-closer').textContent = `${allCloser.length} negócios`;
+      document.getElementById('vgv-pipe-closer').textContent = formatBRL(sumVgv(allCloser));
+
+      document.getElementById('count-pipe-pos').textContent = `${allPos.length} contratos`;
+      document.getElementById('vgv-pipe-pos').textContent = formatBRL(sumVgv(allPos));
+
+      // Atualiza Cards Superiores de Alerta / Resumo
+      const critNovos = pvNovos.filter(x => x.slaStatus === 'crit' || x.slaStatus === 'warn').length;
+      const allFiltered = [...allPrevendas, ...allVendas, ...allCloser, ...allPos];
+      const totalAlertas = allFiltered.filter(x => x.slaStatus === 'crit' || x.slaStatus === 'warn').length;
+
+      document.getElementById('val-alerta-contato').textContent = `${critNovos} leads`;
+      document.getElementById('val-alerta-visitas').textContent = `${vdParecer.length} visitas`;
+      document.getElementById('val-alerta-followup').textContent = `${totalAlertas} alertas`;
+      document.getElementById('val-vgv-total').textContent = formatBRL(sumVgv(allCloser));
+      document.getElementById('sub-vgv-total').textContent = `${allCloser.length} propostas ativas em mesa`;
+      document.getElementById('val-chaves-entregar').textContent = `${allPos.length} contratos`;
+      document.getElementById('sub-chaves-vgv').textContent = `${formatBRL(sumVgv(allPos))} em tramitação`;
+    }
+
+    function renderCardColumn(elementId, badgeId, items) {
+      const container = document.getElementById(elementId);
+      const badge = document.getElementById(badgeId);
+      if (badge) badge.textContent = items.length;
+      if (!container) return;
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="empty-col-state">Nenhum atendimento para este filtro</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="lead-card card-${item.slaStatus || 'ok'}" onclick="openLeadModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+          <div class="card-top">
+            <span class="lead-name">${item.nome}</span>
+            <span class="lead-origin-tag">${item.midia}</span>
+          </div>
+          <div class="lead-property-info">
+            <span>${item.prop}</span>
+            <span class="lead-val">${item.val}</span>
+          </div>
+          <div class="card-footer">
+            <div class="broker-badge">
+              <span class="broker-avatar">${(item.corretor || 'R').slice(0, 2).toUpperCase()}</span>
+              <span>${item.corretor}</span>
+            </div>
+            <span class="time-in-stage ${item.slaStatus === 'crit' ? 'alert' : ''}">
+              ⏱️ ${item.tempo}
+            </span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Renderiza o Ranking Gamificado (com clique para filtrar por corretor)
+    function renderRanking() {
+      const container = document.getElementById('ranking-container');
+      if (!container) return;
+
+      container.innerHTML = CORRETORES_RHEMA.map((c, idx) => {
+        const pos = idx + 1;
+        const topClass = pos === 1 ? 'top-1' : pos === 2 ? 'top-2' : pos === 3 ? 'top-3' : '';
+        const activeClass = currentBrokerFilter === c.apelido ? 'active-broker' : '';
+        return `
+          <div class="ranking-item ${topClass} ${activeClass}" onclick="toggleBrokerFromRanking('${c.apelido}')" title="Clique para filtrar os pipelines por ${c.nome}">
+            <div class="rank-left">
+              <span class="rank-pos">${pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos}</span>
+              <div class="broker-info">
+                <h4>${c.nome} <span style="font-size: 10px; color: var(--gold-primary); font-weight: 700;">${c.badge}</span></h4>
+                <div class="broker-stats">
+                  <span>Visitas: <strong>${c.visitas}</strong></span>
+                  <span>•</span>
+                  <span>Propostas: <strong>${c.propostas}</strong></span>
+                  <span>•</span>
+                  <span>Conversão: <strong>${c.conv}</strong></span>
+                </div>
+              </div>
+            </div>
+            <div class="rank-metrics">
+              <span class="rank-vgv">${c.vgv}</span>
+              <span class="rank-score">Score: ${c.score} pts</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleBrokerFromRanking(apelido) {
+      const selectEl = document.getElementById('filter-corretor');
+      if (currentBrokerFilter === apelido) {
+        currentBrokerFilter = 'all';
+      } else {
+        currentBrokerFilter = apelido;
+      }
+      if (selectEl) selectEl.value = currentBrokerFilter;
+      applyFiltersAndRender();
+    }
+
+    // Renderiza Gráficos Animados com ApexCharts reagindo aos filtros
+    function renderChart(type) {
+      const container = document.getElementById('apex-chart-container');
+      if (!container) return;
+
+      if (currentChartInstance) {
+        currentChartInstance.destroy();
+      }
+
+      // Calcula volumes filtrados reais para alimentar os gráficos
+      const pvNovos = PIPELINE_DATA.prevendas.novos.filter(matchesFilter);
+      const pvQual = [...PIPELINE_DATA.prevendas.contato, ...PIPELINE_DATA.prevendas.qualif, ...PIPELINE_DATA.prevendas.agendamento].filter(matchesFilter);
+      const vdAgend = PIPELINE_DATA.vendas.agendada.filter(matchesFilter);
+      const vdFeitas = [...PIPELINE_DATA.vendas.parecer, ...PIPELINE_DATA.vendas.analise, ...PIPELINE_DATA.vendas.elaboracao].filter(matchesFilter);
+      const clTotal = [...PIPELINE_DATA.closer.apresentada, ...PIPELINE_DATA.closer.contraproposta, ...PIPELINE_DATA.closer.aceite].filter(matchesFilter);
+      const posTotal = [...PIPELINE_DATA.posvenda.certidoes, ...PIPELINE_DATA.posvenda.financiamento, ...PIPELINE_DATA.posvenda.contrato, ...PIPELINE_DATA.posvenda.registro, ...PIPELINE_DATA.posvenda.chaves].filter(matchesFilter);
+
+      const sumVgv = arr => arr.reduce((acc, x) => acc + (x.valorNum || 0), 0);
+
+      let options = {};
+
+      if (type === 'funnel') {
+        options = {
+          series: [{
+            name: "Atendimentos Filtrados",
+            data: [
+              { x: "1. Entrada & Triagem", y: pvNovos.length + pvQual.length },
+              { x: "2. Em Qualificação SDR", y: pvQual.length },
+              { x: "3. Visitas em Campo", y: vdAgend.length + vdFeitas.length },
+              { x: "4. Pós-Visita & Análise", y: vdFeitas.length },
+              { x: "5. Propostas em Mesa", y: clTotal.length },
+              { x: "6. Pós-Venda / Chaves", y: posTotal.length }
+            ]
+          }],
+          chart: {
+            type: 'bar',
+            height: 310,
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 700 }
+          },
+          plotOptions: {
+            bar: {
+              borderRadius: 6,
+              horizontal: true,
+              distributed: true,
+              barHeight: '75%',
+              isFunnel: true,
+              dataLabels: { position: 'center' }
+            }
+          },
+          colors: ['#8B5CF6', '#6366F1', '#3B82F6', '#0284C7', '#F59E0B', '#10B981'],
+          dataLabels: {
+            enabled: true,
+            formatter: function (val, opt) {
+              return opt.w.globals.labels[opt.dataPointIndex] + ": " + val;
+            },
+            style: { fontFamily: 'Outfit', fontWeight: 700, fontSize: '12px', colors: ['#FFF'] }
+          },
+          xaxis: { categories: ["1. Entrada & Triagem", "2. Em Qualificação SDR", "3. Visitas em Campo", "4. Pós-Visita & Análise", "5. Propostas em Mesa", "6. Pós-Venda / Chaves"], labels: { style: { colors: '#94A3B8' } } },
+          yaxis: { labels: { show: false } },
+          tooltip: { theme: 'dark' },
+          grid: { borderColor: 'rgba(255,255,255,0.06)' }
+        };
+      } else if (type === 'vgv') {
+        const vgvPrevendas = sumVgv([...pvNovos, ...pvQual]);
+        const vgvVendas = sumVgv([...vdAgend, ...vdFeitas]);
+        const vgvCloser = sumVgv(clTotal);
+        const vgvPos = sumVgv(posTotal);
+
+        options = {
+          series: [{
+            name: "VGV Filtrado (R$)",
+            data: [vgvPrevendas, vgvVendas, vgvCloser, vgvPos]
+          }],
+          chart: {
+            type: 'bar',
+            height: 310,
+            toolbar: { show: false },
+            animations: { enabled: true, speed: 800 }
+          },
+          plotOptions: {
+            bar: {
+              borderRadius: 8,
+              columnWidth: '50%',
+              distributed: true
+            }
+          },
+          colors: ['#8B5CF6', '#3B82F6', '#F59E0B', '#10B981'],
+          xaxis: {
+            categories: ["Pré-Vendas", "Vendas", "Negociação (Closer)", "Pós-Venda (ADM)"],
+            labels: { style: { colors: '#94A3B8', fontFamily: 'Outfit', fontWeight: 600 } }
+          },
+          yaxis: {
+            labels: {
+              formatter: val => "R$ " + (val / 1000000).toFixed(2) + "M",
+              style: { colors: '#94A3B8' }
+            }
+          },
+          tooltip: {
+            theme: 'dark',
+            y: { formatter: val => "R$ " + val.toLocaleString('pt-BR') }
+          },
+          grid: { borderColor: 'rgba(255,255,255,0.06)' }
+        };
+      } else if (type === 'sla') {
+        options = {
+          series: [
+            { name: "Tempo Real (Média)", data: [38, 31, 52, 64, 42] },
+            { name: "SLA Ideal Rhema", data: [15, 24, 48, 72, 24] }
+          ],
+          chart: {
+            type: 'radar',
+            height: 310,
+            toolbar: { show: false },
+            animations: { enabled: true, speed: 800 }
+          },
+          colors: ['#EF4444', '#10B981'],
+          stroke: { width: 2.5 },
+          fill: { opacity: 0.25 },
+          markers: { size: 4 },
+          xaxis: {
+            categories: ['1º Contato (min)', 'Parecer Visita (h)', 'Proposta Formal (h)', 'Contraproposta (h)', 'Minuta Contrato (h)'],
+            labels: { style: { colors: '#94A3B8', fontFamily: 'Outfit', fontSize: '11px' } }
+          },
+          yaxis: { show: false },
+          legend: { position: 'bottom', labels: { colors: '#FFF' } },
+          tooltip: { theme: 'dark' }
+        };
+      }
+
+      currentChartInstance = new ApexCharts(container, options);
+      currentChartInstance.render();
+    }
+
+    // Modal de Lead e Interatividade
+    function openLeadModal(lead) {
+      document.getElementById('modal-lead-title').textContent = `Atendimento: ${lead.nome}`;
+      document.getElementById('modal-lead-name').textContent = lead.nome;
+      document.getElementById('modal-lead-phone').textContent = lead.tel || '(13) 99876-5432';
+      document.getElementById('modal-lead-origin').textContent = lead.midia;
+      document.getElementById('modal-lead-broker').textContent = lead.corretor;
+      document.getElementById('modal-lead-stage').textContent = lead.slaStatus === 'crit' ? '🚨 Em Alerta Crítico' : 'Normal / Em Andamento';
+      document.getElementById('modal-lead-time').textContent = `${lead.tempo} na etapa atual`;
+      document.getElementById('modal-lead-prop').textContent = `${lead.prop} (${lead.val})`;
+      document.getElementById('modal-lead-diag').textContent = lead.diag;
+
+      const rawPhone = (lead.tel || '').replace(/\D/g, '');
+      const waLink = `https://wa.me/55${rawPhone}?text=Ol%C3%A1%20${encodeURIComponent(lead.nome)}%2C%20tudo%20bem%3F%20Aqui%20%C3%A9%20da%20Rhema%20Im%C3%B3veis!`;
+      document.getElementById('modal-btn-wa').setAttribute('href', waLink);
+
+      document.getElementById('lead-modal').classList.add('open');
+    }
+
+    // Eventos e Configurações Interativas
+    function setupEventListeners() {
+      // Filtros de Corretor e Período
+      const selectCorretor = document.getElementById('filter-corretor');
+      const selectPeriodo = document.getElementById('filter-periodo');
+      const btnClear = document.getElementById('btn-clear-filters');
+
+      if (selectCorretor) {
+        selectCorretor.addEventListener('change', (e) => {
+          currentBrokerFilter = e.target.value;
+          applyFiltersAndRender();
+        });
+      }
+
+      if (selectPeriodo) {
+        selectPeriodo.addEventListener('change', (e) => {
+          currentPeriodFilter = e.target.value;
+          applyFiltersAndRender();
+        });
+      }
+
+      if (btnClear) {
+        btnClear.addEventListener('click', () => {
+          currentBrokerFilter = 'all';
+          currentPeriodFilter = 'all';
+          if (selectCorretor) selectCorretor.value = 'all';
+          if (selectPeriodo) selectPeriodo.value = 'all';
+          applyFiltersAndRender();
+        });
+      }
+
+      // Fechar modal
+      document.getElementById('btn-close-modal').addEventListener('click', () => {
+        document.getElementById('lead-modal').classList.remove('open');
+      });
+      document.getElementById('lead-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'lead-modal') {
+          document.getElementById('lead-modal').classList.remove('open');
+        }
+      });
+
+      // Botão Comemorar Venda (Confetti)
+      document.getElementById('btn-modal-celebrate').addEventListener('click', () => {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#D4A359', '#3B82F6', '#10B981', '#F59E0B']
+        });
+      });
+
+      // Botão Manual Refresh
+      document.getElementById('btn-manual-refresh').addEventListener('click', () => {
+        triggerRefresh(false);
+      });
+
+      // Toggles de Pipeline (Pílulas)
+      document.querySelectorAll('.pipe-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          pill.classList.toggle('active');
+          const targetPipe = pill.getAttribute('data-pipeline');
+          const section = document.querySelector(`.pipeline-section[data-pipe="${targetPipe}"]`);
+          if (section) {
+            section.classList.toggle('hidden', !pill.classList.contains('active'));
+          }
+        });
+      });
+
+      // Preset Telão Sala de Vendas (oculta pós-venda para foco comercial)
+      document.getElementById('preset-telao').addEventListener('click', () => {
+        setActivePreset('preset-telao');
+        stopAutoLoop();
+        setPipelineVisibility({ prevendas: true, vendas: true, closer: true, posvenda: false });
+      });
+
+      // Preset Diretoria (exibe todos os 4)
+      document.getElementById('preset-diretoria').addEventListener('click', () => {
+        setActivePreset('preset-diretoria');
+        stopAutoLoop();
+        setPipelineVisibility({ prevendas: true, vendas: true, closer: true, posvenda: true });
+      });
+
+      // Preset Auto-Loop / Carrossel de TV
+      document.getElementById('preset-carrossel').addEventListener('click', () => {
+        setActivePreset('preset-carrossel');
+        startAutoLoop();
+      });
+
+      // Abas de Gráficos
+      document.querySelectorAll('.btn-chart-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-chart-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeChartType = btn.getAttribute('data-chart');
+          renderChart(activeChartType);
+        });
+      });
+
+      // Fullscreen
+      document.getElementById('btn-fullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+    }
+
+    function setActivePreset(id) {
+      document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function setPipelineVisibility({ prevendas, vendas, closer, posvenda }) {
+      const config = { prevendas, vendas, closer, posvenda };
+      for (const [key, isVisible] of Object.entries(config)) {
+        const pill = document.querySelector(`.pipe-pill[data-pipeline="${key}"]`);
+        const section = document.querySelector(`.pipeline-section[data-pipe="${key}"]`);
+        if (pill) pill.classList.toggle('active', isVisible);
+        if (section) section.classList.toggle('hidden', !isVisible);
+      }
+    }
+
+    // Auto-Loop (Alterna visões a cada 18 segundos no Telão)
+    function startAutoLoop() {
+      stopAutoLoop();
+      let step = 0;
+      autoLoopInterval = setInterval(() => {
+        step = (step + 1) % 3;
+        if (step === 0) {
+          setPipelineVisibility({ prevendas: true, vendas: true, closer: true, posvenda: false });
+          activeChartType = 'funnel';
+        } else if (step === 1) {
+          setPipelineVisibility({ prevendas: false, vendas: false, closer: true, posvenda: true });
+          activeChartType = 'vgv';
+        } else {
+          setPipelineVisibility({ prevendas: true, vendas: true, closer: true, posvenda: true });
+          activeChartType = 'sla';
+        }
+        document.querySelectorAll('.btn-chart-tab').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-chart') === activeChartType);
+        });
+        renderChart(activeChartType);
+      }, 18000);
+    }
+
+    function stopAutoLoop() {
+      if (autoLoopInterval) {
+        clearInterval(autoLoopInterval);
+        autoLoopInterval = null;
+      }
+    }
+  </script>
+</body>
+</html>
