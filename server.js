@@ -25,8 +25,21 @@ function getApiKey() {
 const API_KEY = getApiKey();
 const IMOVIEW_EMAIL = process.env.IMOVIEW_EMAIL || 'brunno@rhemaimobiliaria.com.br';
 const IMOVIEW_SENHA = process.env.IMOVIEW_SENHA || '12345678';
-const SYNC_INTERVAL_SECONDS = parseInt(process.env.SYNC_INTERVAL_SECONDS || '60', 10);
+// Intervalos: 10 minutos (600s) no horário comercial; 30 min fora do expediente
+const COMMERCIAL_INTERVAL_SECONDS = parseInt(process.env.SYNC_INTERVAL_SECONDS || '600', 10); // 10 min
+const OFF_HOURS_INTERVAL_SECONDS = 30 * 60; // 30 min
 const PORT = process.env.PORT || 3210;
+
+function isCommercialHours() {
+  const now = new Date();
+  const utcHours = now.getUTCHours();
+  const brasiliaHours = (utcHours - 3 + 24) % 24;
+  return brasiliaHours >= 8 && brasiliaHours < 19; // 08:00 às 19:00 (Brasília)
+}
+
+function getCurrentIntervalSeconds() {
+  return isCommercialHours() ? COMMERCIAL_INTERVAL_SECONDS : OFF_HOURS_INTERVAL_SECONDS;
+}
 
 const app = express();
 app.use(express.json());
@@ -132,13 +145,15 @@ async function syncWithImoview() {
       console.warn('[Imoview Sync] Aviso ao buscar agenda:', e.message);
     }
 
+    const intervalSecs = getCurrentIntervalSeconds();
     liveState.lastSync = syncStartTime.toISOString();
-    liveState.nextSyncExpected = new Date(Date.now() + SYNC_INTERVAL_SECONDS * 1000).toISOString();
+    liveState.nextSyncExpected = new Date(Date.now() + intervalSecs * 1000).toISOString();
     liveState.syncCount++;
     liveState.syncStatus = 'sucesso';
     liveState.erroSync = null;
 
-    console.log(`[Imoview Sync #${liveState.syncCount}] ⏱️ ${syncStartTime.toLocaleTimeString('pt-BR')} - Atendimentos Venda: ${dashBody.quantidade_atendimentos_em_andamento_venda || 0} | Atividades Hoje: ${dashBody.quantidade_atividades_dia || 0} | Vencidas: ${dashBody.quantidade_atividades_vencidas || 0}`);
+    const periodoStr = isCommercialHours() ? 'Horário Comercial (10 min)' : 'Fora de Expediente (30 min)';
+    console.log(`[Imoview Sync #${liveState.syncCount}] ⏱️ ${syncStartTime.toLocaleTimeString('pt-BR')} [${periodoStr}] - Atendimentos Venda: ${dashBody.quantidade_atendimentos_em_andamento_venda || 0} | Atividades Hoje: ${dashBody.quantidade_atividades_dia || 0} | Vencidas: ${dashBody.quantidade_atividades_vencidas || 0}`);
   } catch (err) {
     liveState.syncStatus = 'erro_sincronizacao';
     liveState.erroSync = err.message;
@@ -146,8 +161,17 @@ async function syncWithImoview() {
   }
 }
 
-// Inicializa o agendador de 1 minuto (60 segundos)
-setInterval(syncWithImoview, SYNC_INTERVAL_SECONDS * 1000);
+// Agendador dinâmico: a cada 60s verifica se é momento de sincronizar com a Imoview
+let lastSyncTimestamp = 0;
+async function schedulerTick() {
+  const now = Date.now();
+  const currentIntervalMs = getCurrentIntervalSeconds() * 1000;
+  if (now - lastSyncTimestamp >= currentIntervalMs) {
+    lastSyncTimestamp = now;
+    await syncWithImoview();
+  }
+}
+setInterval(schedulerTick, 30000); // Checa a cada 30 segundos
 
 // Endpoint de Status & Diagnóstico
 app.get('/api/status', (req, res) => {
@@ -157,7 +181,7 @@ app.get('/api/status', (req, res) => {
     apiConectada: !!session.codigoacesso,
     usuarioLogado: session.nomeusuario,
     ultimoLogin: session.ultimoLogin,
-    syncIntervalSeconds: SYNC_INTERVAL_SECONDS,
+    syncIntervalSeconds: getCurrentIntervalSeconds(), horarioComercial: isCommercialHours(),
     liveState: {
       lastSync: liveState.lastSync,
       nextSyncExpected: liveState.nextSyncExpected,
@@ -173,18 +197,21 @@ app.get('/api/pipeline', (req, res) => {
   res.json({
     atualizadoEm: liveState.lastSync || new Date().toISOString(),
     syncStatus: liveState.syncStatus,
-    intervaloSegundos: SYNC_INTERVAL_SECONDS,
+    intervaloSegundos: getCurrentIntervalSeconds(), horarioComercial: isCommercialHours(),
     usuarioResponsavel: session.nomeusuario || 'Rhema Imóveis',
     imoviewLive: liveState.dashboardMetrics || {},
     agendaHoje: liveState.agendaAtividades || []
   });
 });
 
-// Disparo Manual de Sincronização
+// Disparo Manual de Sincronização (acionado pelo botão Atualizar do painel)
 app.post('/api/sync', async (req, res) => {
+  lastSyncTimestamp = Date.now();
   await syncWithImoview();
   res.json({
-    mensagem: 'Sincronização executada com sucesso',
+    mensagem: 'Sincronização forçada executada com sucesso',
+    horarioComercial: isCommercialHours(),
+    intervaloSegundos: getCurrentIntervalSeconds(),
     liveState
   });
 });
@@ -206,7 +233,7 @@ loginImoview().then(() => syncWithImoview()).finally(() => {
     console.log(`======================================================`);
     console.log(`  🚀 RHEMA PIPELINE TELÃO OPERACIONAL`);
     console.log(`  Porta: ${PORT}`);
-    console.log(`  Auto-Refresh Imoview: A cada ${SYNC_INTERVAL_SECONDS} segundos (1 minuto)`);
+    console.log(`  Auto-Refresh Imoview: A cada 10 minutos no expediente comercial (08h às 19h) e 30 minutos fora`);
     console.log(`  Acesse: http://localhost:${PORT}`);
     console.log(`======================================================`);
   });

@@ -1449,7 +1449,7 @@
         </div>
 
         <!-- Timer Circular Regressivo de 30 Minutos -->
-        <div class="refresh-box" title="Atualiza automaticamente a cada 30 minutos">
+        <div class="refresh-box" title="Atualiza automaticamente a cada 10 minutos no horário comercial">
           <div class="timer-ring-container">
             <svg class="timer-ring-svg" viewBox="0 0 36 36">
               <path class="timer-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -1457,8 +1457,8 @@
             </svg>
           </div>
           <div class="timer-text-group">
-            <span class="timer-label">Auto-Refresh (30m)</span>
-            <span class="timer-countdown" id="timer-text">01:00</span>
+            <span class="timer-label">Auto-Refresh (10m)</span>
+            <span class="timer-countdown" id="timer-text">10:00</span>
           </div>
           <button class="btn-refresh" id="btn-manual-refresh" title="Forçar atualização imediata">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
@@ -2071,7 +2071,7 @@
        ========================================================================== -->
   <script>
     // Configurações do Timer (30 minutos = 1800 segundos)
-    const REFRESH_INTERVAL_SECONDS = 60; // 1 minuto (VPS 24h)
+    const REFRESH_INTERVAL_SECONDS = 10 * 60; // 10 minutos no horário comercial
     let secondsRemaining = REFRESH_INTERVAL_SECONDS;
     let timerInterval = null;
     let autoLoopInterval = null;
@@ -2303,7 +2303,7 @@
             // Atualiza status online no cabeçalho
             const statusBadge = document.querySelector('.live-badge');
             if (statusBadge) {
-              statusBadge.innerHTML = `<span class="pulse-dot"></span> Imoview API Online • Sincronizado a cada 1 min`;
+              statusBadge.innerHTML = `<span class="pulse-dot"></span> Imoview API Online • Sincronizado a cada 10 min`;
             }
           }
         } catch (e) {
